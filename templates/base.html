@@ -1,0 +1,54 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Jobtrail{% endblock %} – Jobtrail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="{% url 'applications:dashboard' %}">Jobtrail</a>
+      {% if user.is_authenticated %}
+        {% with current=request.resolver_match.url_name %}
+        <nav class="main-nav" aria-label="Main">
+          <a href="{% url 'applications:dashboard' %}"{% if current == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+          <a href="{% url 'applications:list' %}"{% if current == 'list' or current == 'detail' or current == 'update' or current == 'delete' %} aria-current="page"{% endif %}>Applications</a>
+        </nav>
+        {% endwith %}
+        <div class="account">
+          <a class="btn btn-primary btn-small" href="{% url 'applications:create' %}">Add application</a>
+          <span class="who">{{ user.get_username }}</span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="link-button" type="submit">Log out</button>
+          </form>
+        </div>
+      {% else %}
+        <div class="account">
+          <a href="{% url 'login' %}">Log in</a>
+          <a class="btn btn-primary btn-small" href="{% url 'signup' %}">Sign up</a>
+        </div>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if messages %}
+  <div class="wrap messages" role="status">
+    {% for message in messages %}
+      <p class="message message-{{ message.tags }}">{{ message }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

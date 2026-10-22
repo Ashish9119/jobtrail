@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Applications{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Applications</h1>
+    <p class="muted">{{ page_obj.paginator.count }} application{{ page_obj.paginator.count|pluralize }}{% if is_filtered %} match your filters{% endif %}</p>
+  </div>
+  <a class="btn btn-primary" href="{% url 'applications:create' %}">Add application</a>
+</div>
+
+<form method="get" class="filters" role="search">
+  <div class="field grow">
+    <label for="{{ filter_form.q.id_for_label }}">{{ filter_form.q.label }}</label>
+    {{ filter_form.q }}
+  </div>
+  <div class="field">
+    <label for="{{ filter_form.status.id_for_label }}">Status</label>
+    {{ filter_form.status }}
+  </div>
+  <div class="field">
+    <label for="{{ filter_form.sort.id_for_label }}">{{ filter_form.sort.label }}</label>
+    {{ filter_form.sort }}
+  </div>
+  <div class="filter-actions">
+    <button class="btn" type="submit">Apply</button>
+    {% if is_filtered %}<a href="{% url 'applications:list' %}">Clear</a>{% endif %}
+  </div>
+</form>
+
+{% if applications %}
+<div class="table-wrap">
+  <table class="apps">
+    <thead>
+      <tr><th>Role</th><th>Location</th><th>Applied</th><th>Status</th><th class="num">Salary</th></tr>
+    </thead>
+    <tbody>
+      {% for application in applications %}
+      <tr>
+        <td>
+          <a class="row-title" href="{{ application.get_absolute_url }}">{{ application.job_title }}</a>
+          <div class="muted">{{ application.company }}</div>
+        </td>
+        <td>{{ application.location|default:"–" }}</td>
+        <td>{{ application.applied_date|date:"j M Y" }}</td>
+        <td><span class="badge badge-{{ application.status }}">{{ application.get_status_display }}</span></td>
+        <td class="num">{% if application.salary %}{{ application.salary|floatformat:"0g" }}{% else %}–{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "applications/_pagination.html" %}
+{% elif is_filtered %}
+<div class="empty">
+  <p>No applications match these filters.</p>
+  <a href="{% url 'applications:list' %}">Clear filters</a>
+</div>
+{% else %}
+<div class="empty">
+  <p>You haven't added any applications yet.</p>
+  <a class="btn btn-primary" href="{% url 'applications:create' %}">Add your first application</a>
+</div>
+{% endif %}
+{% endblock %}

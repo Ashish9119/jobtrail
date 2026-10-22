@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Dashboard</h1>
+  <a class="btn btn-primary" href="{% url 'applications:create' %}">Add application</a>
+</div>
+
+{% if not metrics.total %}
+<div class="empty">
+  <p>Your dashboard fills in as you add applications.</p>
+  <a class="btn btn-primary" href="{% url 'applications:create' %}">Add your first application</a>
+</div>
+{% else %}
+
+<section class="panel" aria-labelledby="pipeline-heading">
+  <h2 id="pipeline-heading">Where your applications stand</h2>
+  <div class="pipe-bar" role="img" aria-label="Share of your applications in each status">
+    {% for s in totals %}{% if s.count %}<span class="pipe-{{ s.value }}" style="flex: {{ s.count }}"></span>{% endif %}{% endfor %}
+  </div>
+  <ul class="pipe-legend">
+    {% for s in totals %}
+    <li>
+      <a href="{% url 'applications:list' %}?status={{ s.value }}">
+        <span class="dot pipe-{{ s.value }}"></span><strong>{{ s.count }}</strong> {{ s.label }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<dl class="metrics">
+  <div>
+    <dt>Applications</dt>
+    <dd>{{ metrics.total }}</dd>
+  </div>
+  <div>
+    <dt>Reached an interview</dt>
+    <dd>{% if metrics.interview_rate is None %}–{% else %}{{ metrics.interview_rate }}%{% endif %}</dd>
+    <dd class="sub">{{ metrics.interviewed }} of {{ metrics.total }}</dd>
+  </div>
+  <div>
+    <dt>Offers</dt>
+    <dd>{{ metrics.offers }}</dd>
+    <dd class="sub">{% if metrics.offer_rate is None %}–{% else %}{{ metrics.offer_rate }}%{% endif %} of applications</dd>
+  </div>
+  <div>
+    <dt>Interview to offer</dt>
+    <dd>{% if metrics.interview_to_offer_rate is None %}–{% else %}{{ metrics.interview_to_offer_rate }}%{% endif %}</dd>
+    <dd class="sub">{{ metrics.offers }} of {{ metrics.interviewed }} interviews</dd>
+  </div>
+</dl>
+
+<section class="panel" aria-labelledby="trend-heading">
+  <h2 id="trend-heading">Applications per month</h2>
+  <div class="chart-box">
+    <canvas id="trend-chart" role="img" aria-label="Bar chart of applications per month over the last 12 months, with a line for applications that reached an interview"></canvas>
+  </div>
+  <details>
+    <summary>View as table</summary>
+    <div class="table-wrap">
+      <table class="apps">
+        <thead><tr><th>Month</th><th class="num">Applications</th><th class="num">Reached interview</th></tr></thead>
+        <tbody>
+          {% for row in trend %}
+          <tr><td>{{ row.label }}</td><td class="num">{{ row.applications }}</td><td class="num">{{ row.interviews }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<section class="panel" aria-labelledby="recent-heading">
+  <h2 id="recent-heading">Most recent</h2>
+  <ul class="recent">
+    {% for application in recent %}
+    <li>
+      <a href="{{ application.get_absolute_url }}">{{ application.job_title }}</a>
+      <span class="muted">{{ application.company }}, {{ application.applied_date|date:"j M" }}</span>
+      <span class="badge badge-{{ application.status }}">{{ application.get_status_display }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+{{ chart_data|json_script:"chart-data" }}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if metrics.total %}
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="{% static 'js/dashboard.js' %}"></script>
+{% endif %}
+{% endblock %}

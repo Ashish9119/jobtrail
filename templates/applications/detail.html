@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ object.job_title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ object.job_title }}</h1>
+    <p class="muted">{{ object.company }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{% url 'applications:update' object.pk %}">Edit</a>
+    <a class="btn btn-danger" href="{% url 'applications:delete' object.pk %}">Delete</a>
+  </div>
+</div>
+
+<section class="panel">
+  <dl class="facts">
+    <div><dt>Status</dt><dd><span class="badge badge-{{ object.status }}">{{ object.get_status_display }}</span></dd></div>
+    <div><dt>Date applied</dt><dd>{{ object.applied_date|date:"j F Y" }}</dd></div>
+    <div><dt>Location</dt><dd>{{ object.location|default:"–" }}</dd></div>
+    <div><dt>Salary</dt><dd>{% if object.salary %}{{ object.salary|floatformat:"0g" }}{% else %}–{% endif %}</dd></div>
+    <div><dt>Reached an interview stage</dt><dd>{{ object.interviewed|yesno:"Yes,No" }}</dd></div>
+    <div><dt>Job posting</dt><dd>{% if object.job_url %}<a href="{{ object.job_url }}" target="_blank" rel="noopener noreferrer">{{ object.job_url|truncatechars:60 }}</a>{% else %}–{% endif %}</dd></div>
+  </dl>
+</section>
+
+<section class="panel">
+  <h2>Notes</h2>
+  {% if object.notes %}{{ object.notes|linebreaks }}{% else %}<p class="muted">No notes yet.</p>{% endif %}
+</section>
+
+<p><a href="{% url 'applications:list' %}">Back to applications</a></p>
+{% endblock %}

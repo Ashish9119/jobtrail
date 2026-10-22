@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Delete application{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>Delete this application?</h1>
+  <p><strong>{{ object.job_title }}</strong> at {{ object.company }} will be permanently removed.</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="actions">
+      <button class="btn btn-danger" type="submit">Delete application</button>
+      <a href="{{ object.get_absolute_url }}">Keep it</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
